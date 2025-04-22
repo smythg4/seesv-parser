@@ -292,8 +292,6 @@ int main(int argc, char *argv[]) {
 
     printf("You provided %d CSV file(s):\n", argc-1);
 
-    linked_list_t *people_list = init_list();
-    bst_t *people_bst = init_bst(compare_person_by_id);
     redblack_tree_t *people_rbt = init_rbt(compare_person_by_id);
 
     for(int i = 1; i < argc; i++) {
@@ -302,8 +300,6 @@ int main(int argc, char *argv[]) {
         char *extension = strrchr(filepath,'.');
         if (extension && strcmp(extension,".csv") == 0) {
             printf("Processing file %d: %s\n",i,filepath);
-            //read_file_into_list(filepath, people_list);
-            read_file_into_bst(filepath, people_bst);
             read_file_into_rbt(filepath, people_rbt);
         }
         else {
@@ -316,32 +312,14 @@ int main(int argc, char *argv[]) {
 
     int id_num = 1452;
     printf("I'm going to remove person with id number %d\n",id_num);
-    bst_remove(people_bst, &id_num);
-    print_bst(people_bst);
+    //rbt_remove(people_rbt, &id_num);
+    print_rbt(people_rbt);
 
     id_num = 3900;
     printf("I'm going to remove person with id number %d\n",id_num);
-    bst_remove(people_bst, &id_num);
-    print_bst(people_bst);
+    //rbt_remove(people_bst, &id_num);
+    print_rbt(people_rbt);
 
-    free_bst(people_bst);
-
- /*    printf("Here's the list I came up with: \n");
-    print_list(people_list);
-
-    printf("Now I'm gonna sort the list by age.\n");
-    merge_sort(people_list, compare_person_by_age);
-
-    printf("Here's the sorted list I came up with: \n");
-    print_list(people_list);
-
-    printf("Now I'm gonna sort the list by id.\n");
-    merge_sort(people_list, compare_person_by_id);
-
-    printf("Here's the sorted list I came up with: \n");
-    print_list(people_list);
-
-    free_list(people_list); */
-
+    free_rbt(people_rbt);
     return 0;
 }

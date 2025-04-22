@@ -6,6 +6,7 @@ typedef struct RBTreeNode rbt_node_t;
 
 //global nil
 rbt_node_t *nil;
+int nil_ref_count = 0;
 
 typedef struct RBTreeNode {
     void* data;
@@ -52,6 +53,7 @@ redblack_tree_t *init_rbt(int (*compare_func)(void*, void*)) {
     }
     redblack_tree_t *tree = (redblack_tree_t *)malloc(sizeof(redblack_tree_t));
     tree->root = nil;
+    nil_ref_count++;
     tree->compare_nodes_data = compare_func;
     return tree;
 }
@@ -227,5 +229,27 @@ void print_rbt(redblack_tree_t *tree) {
     }
     else {
         print_rbt_nodes_r(tree->root);
+    }
+}
+
+void free_rbt_r(rbt_node_t *root) {
+    if (root == nil) {
+        return;
+    }
+    free_rbt_r(root->left);
+    free_rbt_r(root->right);
+    root->free_data(root->data);
+    free(root);
+}
+
+void free_rbt(redblack_tree_t *tree) {
+    if(tree == NULL) {
+        return;
+    }
+    nil_ref_count--;
+    free_rbt_r(tree->root);
+    free(tree);
+    if(nil_ref_count <= 0) {
+        free(nil);
     }
 }
