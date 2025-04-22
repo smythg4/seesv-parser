@@ -59,6 +59,11 @@ redblack_tree_t *init_rbt(int (*compare_func)(void*, void*)) {
 }
 
 void rbt_left_rotate(redblack_tree_t *tree, rbt_node_t *node) {
+    printf("ATTEMPTING TO ROTATE LEFT!!\n");
+    if (node == nil ){
+        printf("node was nil. FAIL\n");
+        return;
+    }
     rbt_node_t *right_child = node->right;
     node->right = right_child->left;
     if( right_child->left != nil) {
@@ -76,9 +81,15 @@ void rbt_left_rotate(redblack_tree_t *tree, rbt_node_t *node) {
     }
     right_child->left = node;
     node->parent = right_child;
+    printf("SUCCESSFULLY ROTATED LEFT!!\n\n");
 }
 
 void rbt_right_rotate(redblack_tree_t *tree, rbt_node_t *node) {
+    printf("ATTEMPTING TO ROTATE RIGHT!!\n");
+    if (node == nil ){
+        printf("node was nil. FAIL\n");
+        return;
+    }
     rbt_node_t *left_child = node->left;
     node->left = left_child->right;
     if( left_child->right != nil) {
@@ -96,17 +107,26 @@ void rbt_right_rotate(redblack_tree_t *tree, rbt_node_t *node) {
     }
     left_child->right = node;
     node->parent = left_child;
+    printf("SUCCESSFULLY ROTATED RIGHT!!\n\n");
 }
 
 void rbt_insert_fixup(redblack_tree_t *tree, rbt_node_t *node) {
+    if (node == nil ) {
+        return;
+    }
+    printf("In the insert fix up function for node: ");
+    node->print_data(node->data);
     rbt_node_t *current = node;
     rbt_node_t *parent = node->parent;
     rbt_node_t *uncle = parent->parent->left; // might be redundant
     while( parent->is_red ) {
+        printf("he's got a red parent\n");
         if(parent == parent->parent->left) {
+            printf("with an uncle that's a right child\n");
             // if current's parent is a left child then the uncle is the parent's right child
             uncle = parent->parent->right;
             if( uncle->is_red ) {
+                printf("who happens to be red\n");
                 //with a red uncle and red parent
                 parent->is_red = false;
                 uncle->is_red = false;
@@ -116,10 +136,12 @@ void rbt_insert_fixup(redblack_tree_t *tree, rbt_node_t *node) {
             }
             else {
                 //with a black uncle and a red parent
+                printf("who happens to be black\n");
                 if(current == parent->right) {
                     // if current is a right child
                     current = parent;
                     parent = current->parent;
+                    printf("node is a right child, so we're gonna rotate left\n");
                     rbt_left_rotate(tree, current);
                 }
                 parent->is_red = false;
@@ -129,8 +151,10 @@ void rbt_insert_fixup(redblack_tree_t *tree, rbt_node_t *node) {
         }
         else {
             // if current's parent is a right child then the uncle is the parent's left child
+            printf("with an uncle that's a left child\n");
             uncle = parent->parent->left;
             if( uncle->is_red ) {
+                printf("who happens to be red\n");
                 //with a red uncle and red parent
                 parent->is_red = false;
                 uncle->is_red = false;
@@ -139,11 +163,13 @@ void rbt_insert_fixup(redblack_tree_t *tree, rbt_node_t *node) {
                 parent = current->parent;
             }
             else {
+                printf("who happens to be black\n");
                 //with a black uncle and a red parent
                 if(current == parent->left) {
                     // if current is a left child
                     current = parent;
                     parent = current->parent;
+                    printf("node is a left child, so we're gonna rotate right\n");
                     rbt_right_rotate(tree, current);
                 }
                 parent->is_red = false;

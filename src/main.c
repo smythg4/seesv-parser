@@ -87,16 +87,16 @@ person_t parse_line(char *csvline) {
             }
         }
     }
-/*     printf("End of line. Buffer value is: %s\n", buffer);
-    printf("Buffer position: %d\n", buffer_pos);
-    printf("Current item count: %d\n", curr_item);
+    // printf("End of line. Buffer value is: %s\n", buffer);
+    // printf("Buffer position: %d\n", buffer_pos);
+    // printf("Current item count: %d\n", curr_item);
     if(curr_item < 7 && buffer_pos > 0) {
         // add the last element to the data array
         buffer[buffer_pos] = '\0';
         data[curr_item] = realloc(data[curr_item], buffer_pos + 1);
         strcpy(data[curr_item], buffer);
-        printf("Current Item: %s", data[curr_item]);
-    } */
+       // printf("Current Item: %s\n", data[curr_item]);
+    } 
 
     person_t result = make_person_from_data(data);
     free(buffer);
@@ -143,8 +143,10 @@ void read_file_into_rbt(char *filepath, redblack_tree_t *tree) {
                 temp_person.last_name = NULL;
                 //print_person(person);
                 
+                printf("Inserting %d into RBT\n",new_person->id);
                 rbt_insert(tree, new_person, free_person_data, print_person_data);
-                
+                //print_rbt(tree);
+
                 // free the memory of the temp_person
                 free_person(&temp_person);
                 buffer_pos = 0;
@@ -301,24 +303,25 @@ int main(int argc, char *argv[]) {
         if (extension && strcmp(extension,".csv") == 0) {
             printf("Processing file %d: %s\n",i,filepath);
             read_file_into_rbt(filepath, people_rbt);
+            print_rbt(people_rbt);
         }
         else {
             printf("Skipping file %d: %s not a .csv file.\n", i, filepath);
         }
     }
 
-    printf("Here's the list I came up with: \n");
-    print_rbt(people_rbt);
+    // printf("Here's the list I came up with: \n");
+    // print_rbt(people_rbt);
 
-    int id_num = 1452;
-    printf("I'm going to remove person with id number %d\n",id_num);
-    //rbt_remove(people_rbt, &id_num);
-    print_rbt(people_rbt);
+    // int id_num = 1452;
+    // printf("I'm going to remove person with id number %d\n",id_num);
+    // //rbt_remove(people_rbt, &id_num);
+    // print_rbt(people_rbt);
 
-    id_num = 3900;
-    printf("I'm going to remove person with id number %d\n",id_num);
-    //rbt_remove(people_bst, &id_num);
-    print_rbt(people_rbt);
+    // id_num = 3900;
+    // printf("I'm going to remove person with id number %d\n",id_num);
+    // //rbt_remove(people_bst, &id_num);
+    // print_rbt(people_rbt);
 
     free_rbt(people_rbt);
     return 0;
