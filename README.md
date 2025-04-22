@@ -1,7 +1,7 @@
 # seesv-parser
 A .csv file parser in C
 
-# Currently working with binary search tree. Not red-black yet.
+# Parses multiple csv files in strict format and puts them into a red-black tree structure
 
 Steps and goals:
 - ~~accept a command line argument to define filename~~
