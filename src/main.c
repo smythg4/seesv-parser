@@ -5,6 +5,7 @@
 #include "person.h"
 #include "linkedlist.h"
 #include "BST.h"
+#include "rbtree.h"
 
 void _init_data(char* data[7]) {
     // takes an array that holds strings of data items and initializes each entry to one character
@@ -57,7 +58,7 @@ person_t parse_line(char *csvline) {
     char *buffer = malloc(buffer_size); // generate a buffer to hold current item before adding it to data
     int buffer_pos = 0;
 
-    printf("\n\nLine for parsing: %s\n\n", csvline);
+    //printf("\n\nLine for parsing: %s\n\n", csvline);
 
     for(int i = 0; csvline[i] != '\0'; i++) {
         // iterate through each character of the line
@@ -71,7 +72,7 @@ person_t parse_line(char *csvline) {
             data[curr_item] = realloc(data[curr_item], buffer_pos + 1); // reallocate the memory to make space
             strcpy(data[curr_item], buffer); // copy the buffer into the data array
 
-            printf("Adding %s to data array in the %d position.\n", data[curr_item], curr_item);
+            //printf("Adding %s to data array in the %d position.\n", data[curr_item], curr_item);
 
             buffer_pos = 0;
             curr_item++;
@@ -86,7 +87,7 @@ person_t parse_line(char *csvline) {
             }
         }
     }
-    printf("End of line. Buffer value is: %s\n", buffer);
+/*     printf("End of line. Buffer value is: %s\n", buffer);
     printf("Buffer position: %d\n", buffer_pos);
     printf("Current item count: %d\n", curr_item);
     if(curr_item < 7 && buffer_pos > 0) {
@@ -95,12 +96,73 @@ person_t parse_line(char *csvline) {
         data[curr_item] = realloc(data[curr_item], buffer_pos + 1);
         strcpy(data[curr_item], buffer);
         printf("Current Item: %s", data[curr_item]);
-    }
+    } */
 
     person_t result = make_person_from_data(data);
     free(buffer);
     free_data(data);
     return result;
+}
+
+void read_file_into_rbt(char *filepath, redblack_tree_t *tree) {
+    // begin file reading logic
+    FILE *file_ptr = fopen(filepath, "r");
+    if (file_ptr == NULL ) {
+        printf("Error openining file: %s", filepath);
+        return;
+    }
+    char c = getc(file_ptr);
+    int buffer_size = 256 * sizeof(char); // default to 256 character buffer
+    char *buffer = malloc(buffer_size);
+    int buffer_pos = 0;
+
+    //logic to skip the header line
+    bool header_skipped = false;
+
+    while( c != EOF ) {
+        if (c == '\n') {
+            if(!header_skipped) {
+                header_skipped = true;
+                buffer_pos = 0;
+                free(buffer);
+                buffer = calloc(1, buffer_size);
+            }
+            else {
+                person_t temp_person = parse_line(buffer);
+                person_t *new_person = malloc(sizeof(person_t));
+                new_person->id = temp_person.id;
+                new_person->age = temp_person.age;
+                new_person->height = temp_person.height;
+                new_person->weight = temp_person.weight;
+                new_person->gender = temp_person.gender;
+                // copy the pointers to the name strings
+                new_person->first_name = temp_person.first_name;
+                new_person->last_name = temp_person.last_name;
+                // nullify the name string pointers in the temp person
+                temp_person.first_name = NULL;
+                temp_person.last_name = NULL;
+                //print_person(person);
+                
+                rbt_insert(tree, new_person, free_person_data, print_person_data);
+                
+                // free the memory of the temp_person
+                free_person(&temp_person);
+                buffer_pos = 0;
+                free(buffer);
+                buffer = calloc(1, buffer_size);
+            }
+        }
+        if (buffer_pos >= buffer_size) {
+            buffer_size *= 2;
+            buffer = realloc(buffer, buffer_size);
+        }
+        buffer[buffer_pos] = c;
+        c = getc(file_ptr);
+        buffer_pos++;
+    }
+    fclose(file_ptr);
+    free(buffer);
+    // end file reading logic
 }
 
 void read_file_into_bst(char *filepath, bst_t *tree) {
@@ -223,8 +285,6 @@ void read_file_into_list(char *filepath, linked_list_t *list) {
 }
 
 int main(int argc, char *argv[]) {
-    printf("Hello, world! Eventually I'll want to accept a command line argument with a filepath to a csv file.\n");
-    printf("In this case you provided %d command line arguments:\n",argc-1);
 
     if (argc < 2) {
         printf("Usage: %s file1.csv file2.csv...\n", argv[0]);
@@ -234,6 +294,7 @@ int main(int argc, char *argv[]) {
 
     linked_list_t *people_list = init_list();
     bst_t *people_bst = init_bst(compare_person_by_id);
+    redblack_tree_t *people_rbt = init_rbt(compare_person_by_id);
 
     for(int i = 1; i < argc; i++) {
         char *filepath = argv[i];
@@ -243,6 +304,7 @@ int main(int argc, char *argv[]) {
             printf("Processing file %d: %s\n",i,filepath);
             //read_file_into_list(filepath, people_list);
             read_file_into_bst(filepath, people_bst);
+            read_file_into_rbt(filepath, people_rbt);
         }
         else {
             printf("Skipping file %d: %s not a .csv file.\n", i, filepath);
@@ -250,11 +312,15 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Here's the list I came up with: \n");
+    print_rbt(people_rbt);
+
+    int id_num = 1452;
+    printf("I'm going to remove person with id number %d\n",id_num);
+    bst_remove(people_bst, &id_num);
     print_bst(people_bst);
 
-
-    printf("I'm going to remove person with id number 1452\n");
-    int id_num = 1452;
+    id_num = 3900;
+    printf("I'm going to remove person with id number %d\n",id_num);
     bst_remove(people_bst, &id_num);
     print_bst(people_bst);
 
